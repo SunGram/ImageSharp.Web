@@ -1,18 +1,18 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
-
-using System;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp.Web.Caching;
-using SixLabors.ImageSharp.Web.Commands;
-using SixLabors.ImageSharp.Web.Middleware;
-using SixLabors.ImageSharp.Web.Processors;
-using SixLabors.ImageSharp.Web.Providers;
 
 namespace SixLabors.ImageSharp.Web.DependencyInjection
 {
+    using System;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
+    using Microsoft.Extensions.Options;
+    using SixLabors.ImageSharp.Web.Caching;
+    using SixLabors.ImageSharp.Web.Commands;
+    using SixLabors.ImageSharp.Web.Middleware;
+    using SixLabors.ImageSharp.Web.Processors;
+    using SixLabors.ImageSharp.Web.Providers;
+
     /// <summary>
     /// Extension methods for <see cref="IServiceCollection"/> to simplify middleware service registration.
     /// </summary>

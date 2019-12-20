@@ -1,11 +1,11 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
-
-using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
 
 namespace SixLabors.ImageSharp.Web.Processors
 {
+    using System.Collections.Generic;
+    using Microsoft.Extensions.Logging;
+
     /// <summary>
     /// Specifies the contract for processing images using a querystring URI API.
     /// </summary>

@@ -1,15 +1,15 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
-
-using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Processing.Processors.Transforms;
-using SixLabors.ImageSharp.Web.Commands;
-using SixLabors.Primitives;
 
 namespace SixLabors.ImageSharp.Web.Processors
 {
+    using System.Collections.Generic;
+    using Microsoft.Extensions.Logging;
+    using SixLabors.ImageSharp.Processing;
+    using SixLabors.ImageSharp.Processing.Processors.Transforms;
+    using SixLabors.ImageSharp.Web.Commands;
+    using SixLabors.Primitives;
+
     /// <summary>
     /// Allows the resizing of images.
     /// </summary>

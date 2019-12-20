@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,7 +34,7 @@ namespace SixLabors.ImageSharp.Web.Sample
                 {
                     return new PhysicalFileSystemCache(
                                 provider.GetRequiredService<IOptions<PhysicalFileSystemCacheOptions>>(),
-                                provider.GetRequiredService<IHostingEnvironment>(),
+                                provider.GetRequiredService<IWebHostEnvironment>(),
                                 provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>(),
                                 provider.GetRequiredService<FormatUtilities>());
                 })
@@ -109,7 +109,7 @@ namespace SixLabors.ImageSharp.Web.Sample
                 {
                     return new PhysicalFileSystemCache(
                         provider.GetRequiredService<IOptions<PhysicalFileSystemCacheOptions>>(),
-                        provider.GetRequiredService<IHostingEnvironment>(),
+                        provider.GetRequiredService<IWebHostEnvironment>(),
                         provider.GetRequiredService<IOptions<ImageSharpMiddlewareOptions>>(),
                         provider.GetRequiredService<FormatUtilities>());
                 })

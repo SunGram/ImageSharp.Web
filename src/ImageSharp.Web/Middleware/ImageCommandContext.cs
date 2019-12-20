@@ -1,12 +1,12 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
-
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
-using SixLabors.ImageSharp.Web.Commands;
 
 namespace SixLabors.ImageSharp.Web.Middleware
 {
+    using System.Collections.Generic;
+    using Microsoft.AspNetCore.Http;
+    using SixLabors.ImageSharp.Web.Commands;
+
     /// <summary>
     /// Contains information about the current image request and parsed commands.
     /// </summary>

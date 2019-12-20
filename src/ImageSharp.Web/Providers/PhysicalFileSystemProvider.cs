@@ -32,7 +32,7 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// <param name="environment">The <see cref="IHostingEnvironment"/> used by this middleware.</param>
         /// <param name="formatUtilities">Contains various format helper methods based on the current configuration.</param>
         public PhysicalFileSystemProvider(
-            IHostingEnvironment environment,
+            IWebHostEnvironment environment,
             FormatUtilities formatUtilities)
         {
             Guard.NotNull(environment, nameof(environment));
