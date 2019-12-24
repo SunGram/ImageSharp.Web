@@ -1,25 +1,25 @@
 // Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp.Web.Caching;
-using SixLabors.ImageSharp.Web.Commands;
-using SixLabors.ImageSharp.Web.Processors;
-using SixLabors.ImageSharp.Web.Providers;
-using SixLabors.ImageSharp.Web.Resolvers;
-using SixLabors.Memory;
-
 namespace SixLabors.ImageSharp.Web.Middleware
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
+    using SixLabors.ImageSharp.Web.Caching;
+    using SixLabors.ImageSharp.Web.Commands;
+    using SixLabors.ImageSharp.Web.Processors;
+    using SixLabors.ImageSharp.Web.Providers;
+    using SixLabors.ImageSharp.Web.Resolvers;
+    using SixLabors.Memory;
+
     /// <summary>
     /// Middleware for handling the processing of images via image requests.
     /// </summary>

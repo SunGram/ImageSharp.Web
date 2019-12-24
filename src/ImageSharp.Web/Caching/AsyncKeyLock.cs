@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -12,7 +12,7 @@ namespace SixLabors.ImageSharp.Web.Caching
     /// The async key lock prevents multiple asynchronous threads acting upon the same object with the given key at the same time.
     /// It is designed so that it does not block unique requests allowing a high throughput.
     /// </summary>
-    internal sealed class AsyncKeyLock
+    public sealed class AsyncKeyLock
     {
         /// <summary>
         /// A collection of doorman counters used for tracking references to the same key.

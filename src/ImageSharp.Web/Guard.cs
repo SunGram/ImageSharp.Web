@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -13,7 +13,7 @@ namespace SixLabors.ImageSharp.Web
     /// Provides methods to protect against invalid parameters.
     /// </summary>
     [DebuggerStepThrough]
-    internal static class Guard
+    public static class Guard
     {
         /// <summary>
         /// Verifies, that the method parameter with specified object value is not null

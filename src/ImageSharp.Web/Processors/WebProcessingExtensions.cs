@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ namespace SixLabors.ImageSharp.Web.Processors
     /// <summary>
     /// Extends the image API to allow processing via a URI API.
     /// </summary>
-    internal static class WebProcessingExtensions
+    public static class WebProcessingExtensions
     {
         /// <summary>
         /// Loops through the available processors and updates the image if any match.

@@ -1,11 +1,11 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
-
-using Microsoft.AspNetCore.Builder;
-using SixLabors.ImageSharp.Web.Middleware;
 
 namespace SixLabors.ImageSharp.Web.DependencyInjection
 {
+    using Microsoft.AspNetCore.Builder;
+    using SixLabors.ImageSharp.Web.Middleware;
+
     /// <summary>
     /// Extension methods for <see cref="IApplicationBuilder"/> to simplify middleware registration.
     /// </summary>

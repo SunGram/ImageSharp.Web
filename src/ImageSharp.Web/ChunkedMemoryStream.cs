@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -11,7 +11,7 @@ namespace SixLabors.ImageSharp.Web
     /// A Memory stream that uses buffer pooling and doesn't need to be resized.
     /// Adapted from <see href="https://referencesource.microsoft.com/#System.Runtime.Remoting/channels/core/chunkedmemorystream.cs"/>.
     /// </summary>
-    internal sealed class ChunkedMemoryStream : Stream
+    public sealed class ChunkedMemoryStream : Stream
     {
         /// <summary>
         /// The default length in bytes of each buffer chunk.

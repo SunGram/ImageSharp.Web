@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -60,7 +61,18 @@ namespace SixLabors.ImageSharp.Web.Providers
             }
 
             var metadata = new ImageMetadata(fileInfo.LastModified.UtcDateTime);
+
             return Task.FromResult<IImageResolver>(new PhysicalFileSystemResolver(fileInfo, metadata));
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <returns></returns>
+        public Task<IImageResolver> GetAsync(Stream stream)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }

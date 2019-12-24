@@ -15,7 +15,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
     /// <summary>
     /// Provides information and methods regarding the current image request.
     /// </summary>
-    internal struct ImageContext
+    public struct ImageContext
     {
         private readonly ImageSharpMiddlewareOptions options;
         private readonly HttpContext context;
@@ -62,7 +62,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
         /// <summary>
         /// Enumerates the possible precondition states.
         /// </summary>
-        internal enum PreconditionState
+        public enum PreconditionState
         {
             /// <summary>
             /// Unspeciified
@@ -155,8 +155,12 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 this.response.Body.Position = 0;
             }
         }
-
-        private static PreconditionState GetMaxPreconditionState(params PreconditionState[] states)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="states"></param>
+        /// <returns></returns>
+        public static PreconditionState GetMaxPreconditionState(params PreconditionState[] states)
         {
             PreconditionState max = PreconditionState.Unspecified;
             foreach (PreconditionState state in states)

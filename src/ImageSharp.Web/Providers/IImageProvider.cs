@@ -1,8 +1,9 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp.Web.Resolvers;
@@ -34,5 +35,12 @@ namespace SixLabors.ImageSharp.Web.Providers
         /// <param name="context">The current HTTP request context.</param>
         /// <returns>The <see cref="IImageResolver"/>.</returns>
         Task<IImageResolver> GetAsync(HttpContext context);
+
+        /// <summary>
+        /// Gets the image resolver associated with the context.
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <returns>The <see cref="IImageResolver"/>.</returns>
+        Task<IImageResolver> GetAsync(Stream stream);
     }
 }
