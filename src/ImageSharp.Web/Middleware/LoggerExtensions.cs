@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -9,7 +9,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
     /// <summary>
     /// Extensions methods for the <see cref="ILogger"/> interface.
     /// </summary>
-    internal static class LoggerExtensions
+    public static class LoggerExtensions
     {
         private static readonly Action<ILogger, string, Exception> LogProcessingErrorAction;
         private static readonly Action<ILogger, string, Exception> LogResolveFailedAction;

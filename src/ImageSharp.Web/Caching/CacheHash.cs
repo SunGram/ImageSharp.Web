@@ -42,6 +42,7 @@ namespace SixLabors.ImageSharp.Web.Caching
             {
                 Encoding.ASCII.GetBytes(value, 0, byteCount, buffer.Array, 0);
                 byte[] hash = hashAlgorithm.ComputeHash(buffer.Array, 0, byteCount);
+            
                 return $"{HexEncoder.Encode(new Span<byte>(hash).Slice(0, len / 2))}";
             }
         }
