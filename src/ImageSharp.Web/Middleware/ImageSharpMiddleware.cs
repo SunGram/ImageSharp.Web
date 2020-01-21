@@ -6,6 +6,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Drawing;
     using System.IO;
     using System.Linq;
     using System.Text;
@@ -19,6 +20,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
     using SixLabors.ImageSharp.Web.Providers;
     using SixLabors.ImageSharp.Web.Resolvers;
     using SixLabors.Memory;
+    using SkiaSharp;
 
     /// <summary>
     /// Middleware for handling the processing of images via image requests.
@@ -143,6 +145,8 @@ namespace SixLabors.ImageSharp.Web.Middleware
 
             this.logger = loggerFactory.CreateLogger<ImageSharpMiddleware>();
             this.formatUtilities = formatUtilities;
+
+            this.InitSkiaFormatOption();
         }
 
 #pragma warning disable IDE1006 // Naming Styles
@@ -157,7 +161,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
             IDictionary<string, string> commands = this.requestParser.ParseRequestCommands(context);
             if (commands.Count > 0)
             {
-                List<string> commandKeys = new List<string>(commands.Keys);
+                var commandKeys = new List<string>(commands.Keys);
                 foreach (string command in commandKeys)
                 {
                     if (!this.knownCommands.Contains(command))
@@ -253,7 +257,7 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 }
 
                 // Not cached? Let's get it from the image resolver.
-                ChunkedMemoryStream outStream = null;
+                Stream outStream = null;
                 try
                 {
                     if (processRequest)
@@ -267,37 +271,19 @@ namespace SixLabors.ImageSharp.Web.Middleware
                             ImageCacheMetadata cachedImageMetadata = default;
                             outStream = new ChunkedMemoryStream(this.memoryAllocator);
                             using (Stream inStream = await sourceImageResolver.OpenReadAsync().ConfigureAwait(false))
-                            using (var image = FormattedImage.Load(this.options.Configuration, inStream))
                             {
-                                image.Process(this.logger, this.processors, commands);
-                                this.options.OnBeforeSave?.Invoke(image);
-                                image.Save(outStream);
+                                var codec = SKCodec.Create(inStream);
 
-                                // Check to see if the source metadata has a cachecontrol max-age value and use it to
-                                // override the default max age from our options.
-                                var maxAge = TimeSpan.FromDays(this.options.MaxBrowserCacheDays);
-                                if (!sourceImageMetadata.CacheControlMaxAge.Equals(TimeSpan.MinValue))
+                                if (this.CheckISWhiteList(codec.EncodedFormat))
                                 {
-                                    maxAge = sourceImageMetadata.CacheControlMaxAge;
+                                    cachedImageMetadata = await this.ImageSharpProcess(context, imageContext, commands, key, sourceImageMetadata, outStream, inStream);
                                 }
-
-                                cachedImageMetadata = new ImageCacheMetadata(
-                                    sourceImageMetadata.LastWriteTimeUtc,
-                                    DateTime.UtcNow,
-                                    image.Format.DefaultMimeType,
-                                    maxAge);
+                                else
+                                {
+                                    cachedImageMetadata = await this.SkiaSharpProcess(context, imageContext, commands, key, sourceImageMetadata, outStream, codec);
+                                }
+                                codec.Dispose();
                             }
-
-                            // Allow for any further optimization of the image. Always reset the position just in case.
-                            outStream.Position = 0;
-                            string contentType = cachedImageMetadata.ContentType;
-                            string extension = this.formatUtilities.GetExtensionFromContentType(contentType);
-                            this.options.OnProcessed?.Invoke(new ImageProcessingContext(context, outStream, commands, contentType, extension));
-                            outStream.Position = 0;
-
-                            // Save the image to the cache and send the response to the caller.
-                            await this.cache.SetAsync(key, outStream, cachedImageMetadata).ConfigureAwait(false);
-                            await this.SendResponseAsync(imageContext, key, outStream, cachedImageMetadata).ConfigureAwait(false);
                         }
                     }
                 }
@@ -314,7 +300,158 @@ namespace SixLabors.ImageSharp.Web.Middleware
                 }
             }
         }
+        private List<SKEncodedImageFormat> IsWhiteList;
+        private bool CheckISWhiteList(SKEncodedImageFormat item)
+        {
+            if (this.IsWhiteList == null)
+            {
+                this.IsWhiteList = new List<SKEncodedImageFormat>
+                {
+                    SKEncodedImageFormat.Jpeg,
+                    SKEncodedImageFormat.Png,
+                    SKEncodedImageFormat.Gif,
+                    SKEncodedImageFormat.Png
+                };
+            }
 
+            return this.IsWhiteList.Any(x => x == item);
+        }
+        private async Task<ImageCacheMetadata> SkiaSharpProcess(HttpContext context, ImageContext imageContext, IDictionary<string, string> commands, string key,
+            ImageMetadata sourceImageMetadata, Stream outStream, SKCodec codec)
+        {
+            ImageCacheMetadata cachedImageMetadata;
+
+            var bitmap = SKBitmap.Decode(codec);
+
+            SKImage output;
+            var Src = SKImage.FromBitmap(bitmap);
+
+
+            CommandParser parser = CommandParser.Instance;
+            Size size = ParseSize(commands, parser);
+
+            float resizeFactorX = (float)size.Width / (float)Src.Width;
+            //float resizeFactorY = (float)height / (float)Src.Height;
+
+            using (var surface = SKSurface.Create(new SKImageInfo((int)(Src.Width *
+                   resizeFactorX), (int)(Src.Height * resizeFactorX),
+                   SKColorType.Bgra8888, SKAlphaType.Opaque)))
+            {
+                surface.Canvas.SetMatrix(SKMatrix.MakeScale(resizeFactorX, resizeFactorX));
+                surface.Canvas.DrawImage(Src, 0, 0);
+                surface.Canvas.Flush();
+                output = surface.Snapshot();
+                SKData data = output.Encode(codec.EncodedFormat, 80);
+
+                outStream = new MemoryStream(data.ToArray());
+
+                var maxAge = TimeSpan.FromDays(this.options.MaxBrowserCacheDays);
+                if (!sourceImageMetadata.CacheControlMaxAge.Equals(TimeSpan.MinValue))
+                {
+                    maxAge = sourceImageMetadata.CacheControlMaxAge;
+                }
+
+
+                cachedImageMetadata = new ImageCacheMetadata(
+                    sourceImageMetadata.LastWriteTimeUtc,
+                    DateTime.UtcNow,
+                    this.formatOptions[codec.EncodedFormat].MimeType,
+                    maxAge);
+            }
+            // Allow for any further optimization of the image. Always reset the position just in case.
+            outStream.Position = 0;
+            string contentType = this.formatOptions[codec.EncodedFormat].MimeType;
+            string extension = this.formatOptions[codec.EncodedFormat].Extension;
+            this.options.OnProcessed?.Invoke(new ImageProcessingContext(context, outStream, commands, contentType, extension));
+            outStream.Position = 0;
+
+            // Save the image to the cache and send the response to the caller.
+            await this.cache.SetAsync(key, outStream, cachedImageMetadata).ConfigureAwait(false);
+            await this.SendResponseAsync(imageContext, key, outStream, cachedImageMetadata).ConfigureAwait(false);
+            return cachedImageMetadata;
+        }
+        internal class SkiaFormatOption
+        {
+            public string MimeType
+            {
+                get;
+                set;
+            }
+            public string Extension
+            {
+                get;
+                set;
+            }
+            public SkiaFormatOption(string mimeType, string extension)
+            {
+                this.MimeType = mimeType;
+                this.Extension = extension;
+            }
+        }
+        private Dictionary<SKEncodedImageFormat, SkiaFormatOption> formatOptions;
+
+        private void InitSkiaFormatOption()
+        {
+            if (this.formatOptions == null)
+            {
+                this.formatOptions = new Dictionary<SKEncodedImageFormat, SkiaFormatOption>();
+            }
+            this.formatOptions.Add(SKEncodedImageFormat.Heif, new SkiaFormatOption("image/heif", "heif"));
+            this.formatOptions.Add(SKEncodedImageFormat.Dng, new SkiaFormatOption("image/dng", "dng"));
+            this.formatOptions.Add(SKEncodedImageFormat.Astc, new SkiaFormatOption("image/astc", "astc"));
+            this.formatOptions.Add(SKEncodedImageFormat.Ktx, new SkiaFormatOption("image/ktx", "ktx"));
+            this.formatOptions.Add(SKEncodedImageFormat.Pkm, new SkiaFormatOption("image/pkm", "pkm"));
+            this.formatOptions.Add(SKEncodedImageFormat.Webp, new SkiaFormatOption("image/webp", "webp"));
+            this.formatOptions.Add(SKEncodedImageFormat.Wbmp, new SkiaFormatOption("image/wbmp", "wbmp"));
+        }
+
+        private async Task<ImageCacheMetadata> ImageSharpProcess(HttpContext context, ImageContext imageContext, IDictionary<string, string> commands, string key,
+            ImageMetadata sourceImageMetadata, Stream outStream, Stream inStream)
+        {
+            ImageCacheMetadata cachedImageMetadata;
+            inStream.Position = 0;
+            using (var image = FormattedImage.Load(this.options.Configuration, inStream))
+            {
+                image.Process(this.logger, this.processors, commands);
+                this.options.OnBeforeSave?.Invoke(image);
+                image.Save(outStream);
+
+                // Check to see if the source metadata has a cachecontrol max-age value and use it to
+                // override the default max age from our options.
+                var maxAge = TimeSpan.FromDays(this.options.MaxBrowserCacheDays);
+                if (!sourceImageMetadata.CacheControlMaxAge.Equals(TimeSpan.MinValue))
+                {
+                    maxAge = sourceImageMetadata.CacheControlMaxAge;
+                }
+
+                cachedImageMetadata = new ImageCacheMetadata(
+                    sourceImageMetadata.LastWriteTimeUtc,
+                    DateTime.UtcNow,
+                    image.Format.DefaultMimeType,
+                    maxAge);
+            }
+
+            // Allow for any further optimization of the image. Always reset the position just in case.
+            outStream.Position = 0;
+            string contentType = cachedImageMetadata.ContentType;
+            string extension = this.formatUtilities.GetExtensionFromContentType(contentType);
+            this.options.OnProcessed?.Invoke(new ImageProcessingContext(context, outStream, commands, contentType, extension));
+            outStream.Position = 0;
+
+            // Save the image to the cache and send the response to the caller.
+            await this.cache.SetAsync(key, outStream, cachedImageMetadata).ConfigureAwait(false);
+            await this.SendResponseAsync(imageContext, key, outStream, cachedImageMetadata).ConfigureAwait(false);
+            return cachedImageMetadata;
+        }
+
+        private static Size ParseSize(IDictionary<string, string> commands, CommandParser parser)
+        {
+            // The command parser will reject negative numbers as it clamps values to ranges.
+            uint width = parser.ParseValue<uint>(commands.GetValueOrDefault("width"));
+            uint height = parser.ParseValue<uint>(commands.GetValueOrDefault("height"));
+
+            return new Size((int)width, (int)height);
+        }
         private async Task SendResponseAsync(ImageContext imageContext, string key, Stream stream, ImageCacheMetadata metadata)
         {
             imageContext.ComprehendRequestHeaders(metadata.CacheLastWriteTimeUtc, stream.Length);
