@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -29,14 +29,25 @@ namespace SixLabors.ImageSharp.Web
             // The formats contained in the configuration are used a lot in hash generation
             // so we need them to be enumerated to remove allocations and allow indexing.
             this.imageFormats = configuration.ImageFormats.ToArray();
+            
             for (int i = 0; i < this.imageFormats.Length; i++)
             {
                 string[] extensions = this.imageFormats[i].FileExtensions.ToArray();
                 this.fileExtensions[this.imageFormats[i]] = extensions;
                 this.fileExtension[this.imageFormats[i].DefaultMimeType] = extensions[0];
             }
+            this.customImageFormats();
         }
-
+        private void customImageFormats()
+        {
+            this.fileExtension["image/heif"] = "heif";
+            this.fileExtension["image/dng"] = "dng";
+            this.fileExtension["image/astc"] = "astc";
+            this.fileExtension["image/ktx"] = "ktx";
+            this.fileExtension["image/pkm"] = "pkm";
+            this.fileExtension["image/webp"] = "webp";
+            this.fileExtension["image/wbmp"] = "wbmp";
+        }
         /// <summary>
         /// Gets the file extension for the given image uri.
         /// </summary>
