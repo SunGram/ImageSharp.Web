@@ -71,6 +71,18 @@
     <PackageReference Include="SkiaSharp" Version="1.68.2-preview.17" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="libHarfBuzzSharp.so">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="libSkiaSharp.so">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="libSkiaSharp.so-nodeps.so">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
   <PropertyGroup>
     <RootNamespace>SixLabors.ImageSharp.Web</RootNamespace>
     <ApplicationIcon />
